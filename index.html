@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⭐ Dhiya & Iniya — Chores</title>
+<style>
+  :root {
+    --green:#1D9E75; --green-light:#E1F5EE; --green-mid:#5DCAA5;
+    --green-dark:#0F6E56; --green-pale:#9FE1CB;
+    --purple:#534AB7; --amber:#EF9F27; --amber-light:#FAEEDA;
+    --bg:#FAF9F6; --card:#FFFFFF; --border:rgba(0,0,0,0.08);
+    --border-mid:rgba(0,0,0,0.13); --text:#1a1a18;
+    --text-2:#5a5a56; --text-3:#9a9a94;
+    --radius:12px; --radius-sm:8px;
+  }
+  @media (prefers-color-scheme:dark) {
+    :root {
+      --bg:#141412; --card:#1e1e1b; --border:rgba(255,255,255,0.08);
+      --border-mid:rgba(255,255,255,0.14); --text:#f0efe8;
+      --text-2:#a8a89e; --text-3:#686860;
+      --green-light:#0a2a1e; --amber-light:#2a1e06;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{background:var(--bg);}
+  body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;}
+
+  /* AUTH */
+  #auth-screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;}
+  .auth-star{font-size:60px;margin-bottom:1.25rem;}
+  .auth-title{font-size:24px;font-weight:700;color:var(--text);margin-bottom:8px;}
+  .auth-sub{font-size:14px;color:var(--text-2);margin-bottom:2rem;line-height:1.6;}
+  .google-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border-mid);border-radius:50px;padding:12px 24px;font-size:15px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.15s;margin-bottom:1rem;}
+  .google-btn:hover{box-shadow:0 2px 12px rgba(0,0,0,0.1);}
+  .google-icon{width:20px;height:20px;}
+  .auth-note{font-size:12px;color:var(--text-3);max-width:300px;line-height:1.6;}
+
+  /* SETUP BOX */
+  .setup-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-top:2rem;max-width:420px;width:100%;text-align:left;}
+  .setup-box h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;}
+  .setup-box ol{font-size:12px;color:var(--text-2);line-height:1.9;padding-left:1.2rem;}
+  .setup-box a{color:var(--green);text-decoration:none;}
+  .setup-box input{width:100%;margin-top:12px;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:13px;outline:none;}
+  .setup-box input:focus{border-color:var(--green);}
+  .save-btn{margin-top:10px;width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border-radius:50px;}
+
+  /* APP */
+  #app-screen{display:none;max-width:480px;margin:0 auto;padding-bottom:80px;}
+  .top-bar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 18px 8px;}
+  .top-bar-row{display:flex;align-items:center;justify-content:space-between;}
+  .app-title{font-size:17px;font-weight:700;color:var(--text);}
+  .sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);padding:4px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);}
+  .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green-mid);flex-shrink:0;}
+  .sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+  .sync-dot.error{background:#E24B4A;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  .kid-tabs{display:flex;gap:8px;margin-top:10px;}
+  .kid-tab{flex:1;padding:9px 0;border-radius:50px;border:1.5px solid var(--border-mid);background:var(--card);font-size:14px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all 0.15s;text-align:center;}
+  .kid-tab.active{background:var(--green);border-color:var(--green);color:white;}
+  .earn-tab{padding:9px 14px;border-radius:50px;border:1.5px solid var(--border-mid);background:var(--card);font-size:14px;color:var(--text-2);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+  .earn-tab.active{background:var(--amber);border-color:var(--amber);color:white;}
+
+  /* CONTENT */
+  .content{padding:14px 18px;}
+  .date-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .nav-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-mid);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0;transition:background 0.12s;}
+  .nav-btn:hover{background:var(--border);}
+  .date-center{flex:1;text-align:center;}
+  .date-main{font-size:15px;font-weight:600;color:var(--text);}
+  .date-sub{font-size:11px;color:var(--text-3);margin-top:1px;}
+  .today-btn{font-size:11px;padding:4px 10px;background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-pale);border-radius:20px;cursor:pointer;font-weight:500;white-space:nowrap;}
+  .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+  .stat-card .s-lbl{font-size:11px;color:var(--text-3);margin-bottom:4px;}
+  .stat-card .s-val{font-size:22px;font-weight:700;color:var(--text);}
+  .stat-card .s-sub{font-size:11px;color:var(--text-2);margin-top:2px;}
+  .prog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:14px;}
+  .prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .prog-title{font-size:12px;font-weight:500;color:var(--text-2);}
+  .prog-count{font-size:12px;color:var(--text-3);}
+  .prog-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--green));border-radius:4px;transition:width 0.4s ease;}
+  .prog-reward{font-size:11px;color:var(--text-3);margin-top:5px;}
+  .cat-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin:14px 0 6px;}
+  .chore-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 13px;margin-bottom:5px;cursor:pointer;transition:all 0.15s;user-select:none;}
+  .chore-item:active{transform:scale(0.98);}
+  .chore-item.done{background:var(--green-light);border-color:var(--green-pale);}
+  .check{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid var(--border-mid);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .chore-item.done .check{background:var(--green);border-color:var(--green);}
+  .check svg{display:none;}
+  .chore-item.done .check svg{display:block;}
+  .chore-text{flex:1;font-size:14px;color:var(--text);}
+  .chore-item.done .chore-text{color:var(--green-dark);}
+  .star-chip{font-size:12px;font-weight:600;padding:3px 9px;background:var(--bg);border:1px solid var(--border);border-radius:20px;color:var(--text-2);white-space:nowrap;}
+  .chore-item.done .star-chip{background:var(--green-pale);border-color:transparent;color:var(--green-dark);}
+
+  /* EARNINGS */
+  .earn-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .earn-hero-card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);padding:15px;text-align:center;}
+  .earn-hero-card .kid{font-size:12px;color:var(--text-3);margin-bottom:7px;}
+  .earn-hero-card .amount{font-size:26px;font-weight:700;}
+  .earn-hero-card .amount.dhiya{color:var(--green);}
+  .earn-hero-card .amount.iniya{color:var(--purple);}
+  .earn-hero-card .earn-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
+  .earn-hero-card .sep{margin:9px 0;border-top:1px solid var(--border);}
+  .earn-hero-card .wk-prog{font-size:13px;font-weight:600;color:var(--text);}
+  .earn-hero-card .wk-lbl{font-size:11px;color:var(--text-3);}
+  .info-strip{background:var(--amber-light);border:1px solid rgba(239,159,39,0.25);border-radius:var(--radius-sm);padding:10px 13px;font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:14px;}
+  .hist-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin:14px 0 7px;}
+  .hist-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:5px;}
+  .hist-row .hr-week{font-size:12px;color:var(--text-2);}
+  .hist-row .hr-stars{font-size:12px;font-weight:600;color:var(--text);}
+  .hist-row .hr-earn{font-size:12px;font-weight:700;color:var(--green);}
+  .hist-row .hr-ongoing{font-size:12px;color:var(--text-3);font-style:italic;}
+  .empty-note{font-size:13px;color:var(--text-3);padding:8px 0;}
+  .signout-btn{display:block;margin:24px auto 0;padding:8px 20px;background:transparent;border:1px solid var(--border-mid);border-radius:20px;font-size:13px;color:var(--text-2);cursor:pointer;}
+  .signout-btn:hover{background:var(--card);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#f0efe8;padding:10px 20px;border-radius:20px;font-size:13px;z-index:100;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-star">⭐</div>
+  <div class="auth-title">Dhiya & Iniya<br>Chores Tracker</div>
+  <div class="auth-sub">Sign in with Google to sync your chores<br>and stars across all your devices.</div>
+  <button class="google-btn" onclick="handleSignIn()">
+    <svg class="google-icon" viewBox="0 0 24 24">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Sign in with Google
+  </button>
+  <p class="auth-note">Stores data in a file called <strong>chores_data.json</strong> in your Google Drive — works on any device.</p>
+
+  <div class="setup-box" id="setup-box" style="display:none;">
+    <h3>🔧 One-time setup</h3>
+    <ol>
+      <li>Go to <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a></li>
+      <li>Create a project → enable <strong>Google Drive API</strong></li>
+      <li>Go to <strong>APIs & Services → Credentials</strong></li>
+      <li>Create <strong>OAuth 2.0 Client ID</strong> → Web application</li>
+      <li>Add your file's URL to <em>Authorized JavaScript origins</em></li>
+      <li>Paste your Client ID below</li>
+    </ol>
+    <input type="text" id="client-id-input" placeholder="Your Google OAuth Client ID (ends in .apps.googleusercontent.com)" />
+    <button class="save-btn" onclick="saveClientId()">Save & Sign In</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-screen">
+  <div class="top-bar">
+    <div class="top-bar-row">
+      <div class="app-title">⭐ Stars Tracker</div>
+      <div class="sync-pill">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Synced</span>
+      </div>
+    </div>
+    <div class="kid-tabs">
+      <button class="kid-tab active" id="tab-dhiya" onclick="switchKid('Dhiya')">🌸 Dhiya</button>
+      <button class="kid-tab" id="tab-iniya" onclick="switchKid('Iniya')">🌺 Iniya</button>
+      <button class="earn-tab" id="tab-earn" onclick="showEarnings()">💰 Earnings</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="chores-view">
+      <div class="date-nav">
+        <button class="nav-btn" onclick="changeDate(-1)">&#8249;</button>
+        <div class="date-center">
+          <div class="date-main" id="date-main"></div>
+          <div class="date-sub" id="date-sub"></div>
+        </div>
+        <button class="nav-btn" onclick="changeDate(1)">&#8250;</button>
+        <button class="today-btn" onclick="goToday()">Today</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="s-lbl">Today's stars</div><div class="s-val" id="stat-today">0</div><div class="s-sub">⭐ earned</div></div>
+        <div class="stat-card"><div class="s-lbl">This week</div><div class="s-val" id="stat-week">0</div><div class="s-sub">⭐ total</div></div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-hdr"><span class="prog-title">Progress to next 2 kr</span><span class="prog-count" id="prog-count">0 / 15</span></div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="prog-reward" id="prog-reward"></div>
+      </div>
+      <div id="chores-list"></div>
+    </div>
+
+    <div id="earnings-view" style="display:none;">
+      <div class="earn-hero" id="earn-hero"></div>
+      <div class="info-strip">💡 Every 15 stars = 2 kr. Earnings confirmed at end of each Sunday. Current week stars are still in progress.</div>
+      <div class="hist-title">🌸 Dhiya — Weekly History</div>
+      <div id="hist-dhiya"></div>
+      <div class="hist-title" style="margin-top:16px;">🌺 Iniya — Weekly History</div>
+      <div id="hist-iniya"></div>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CHORES = [
+  {cat:'Food Goals',      name:'Vegetables',           stars:2},
+  {cat:'Food Goals',      name:'Fruits',               stars:2},
+  {cat:'Food Goals',      name:'Full Egg',             stars:1},
+  {cat:'Food Goals',      name:'Beetroot Juice',       stars:2},
+  {cat:'Time Management', name:'Leave by 7:45 AM',     stars:1},
+  {cat:'Time Management', name:'Shower under 20 min',  stars:1},
+  {cat:'Time Management', name:'Hair wash under 1 hr', stars:1},
+  {cat:'Time Management', name:'TV time — 45 min',     stars:1},
+  {cat:'Time Management', name:'Screen time — 1 hr',   stars:1},
+  {cat:'Time Management', name:'Bed by 9:30 PM',       stars:2},
+  {cat:'Studying',        name:'Writing 1 page',       stars:1},
+  {cat:'Studying',        name:'Tamil — Read / Write', stars:1},
+  {cat:'Studying',        name:'Math',                 stars:1},
+];
+
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+const FILE_NAME = 'chores_data.json';
+
+let CLIENT_ID = localStorage.getItem('goog_client_id') || '';
+let tokenClient = null, accessToken = null;
+let driveFileId = localStorage.getItem('chores_file_id') || '';
+let appData = {Dhiya:{}, Iniya:{}};
+let currentKid = 'Dhiya', currentView = 'chores';
+let currentDate = new Date(); currentDate.setHours(0,0,0,0);
+let saveTimer = null;
+
+// ── SETUP ──
+function onClientIdInput(v) { CLIENT_ID = v.trim(); }
+function saveClientId() {
+  const v = document.getElementById('client-id-input').value.trim();
+  if (!v) { showToast('Please paste your Client ID'); return; }
+  localStorage.setItem('goog_client_id', v);
+  CLIENT_ID = v;
+  document.getElementById('setup-box').style.display = 'none';
+  loadGIS();
+}
+
+// ── GOOGLE SIGN IN ──
+function loadGIS() {
+  if (window._gisLoaded) { initTokenClient(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = () => { window._gisLoaded = true; initTokenClient(); };
+  document.head.appendChild(s);
+}
+
+function initTokenClient() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: onToken,
+  });
+}
+
+function handleSignIn() {
+  if (!CLIENT_ID) {
+    document.getElementById('setup-box').style.display = 'block';
+    return;
+  }
+  if (!tokenClient) { showToast('Loading... please try again'); loadGIS(); return; }
+  tokenClient.requestAccessToken({prompt: ''});
+}
+
+function onToken(resp) {
+  if (resp.error) { showToast('Sign-in failed: ' + resp.error); return; }
+  accessToken = resp.access_token;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  loadFromDrive();
+}
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, ()=>{});
+  accessToken = null;
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+// ── DRIVE ──
+async function findOrCreateFile() {
+  const q = encodeURIComponent(`name='${FILE_NAME}' and trashed=false`);
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&spaces=drive`, {
+    headers: {'Authorization':'Bearer ' + accessToken}
+  });
+  const d = await r.json();
+  if (d.files && d.files.length > 0) {
+    driveFileId = d.files[0].id;
+    localStorage.setItem('chores_file_id', driveFileId);
+    return driveFileId;
+  }
+  const meta = JSON.stringify({name: FILE_NAME, mimeType:'application/json'});
+  const body = JSON.stringify({Dhiya:{}, Iniya:{}});
+  const form = new FormData();
+  form.append('metadata', new Blob([meta], {type:'application/json'}));
+  form.append('file', new Blob([body], {type:'application/json'}));
+  const cr = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method:'POST', headers:{'Authorization':'Bearer ' + accessToken}, body:form
+  });
+  const cf = await cr.json();
+  driveFileId = cf.id;
+  localStorage.setItem('chores_file_id', driveFileId);
+  return driveFileId;
+}
+
+async function loadFromDrive() {
+  setSyncStatus('syncing','Loading...');
+  try {
+    const fid = await findOrCreateFile();
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`, {
+      headers:{'Authorization':'Bearer ' + accessToken}
+    });
+    const txt = await r.text();
+    const parsed = JSON.parse(txt);
+    if (parsed.Dhiya !== undefined) appData = parsed;
+    localStorage.setItem('chores_cache', JSON.stringify(appData));
+    setSyncStatus('ok','Synced');
+  } catch(e) {
+    const c = localStorage.getItem('chores_cache');
+    if (c) try { appData = JSON.parse(c); } catch{}
+    setSyncStatus('error','Offline — cached data');
+  }
+  render();
+}
+
+async function saveToDrive() {
+  if (!accessToken) return;
+  setSyncStatus('syncing','Saving...');
+  const json = JSON.stringify(appData, null, 2);
+  localStorage.setItem('chores_cache', json);
+  try {
+    if (!driveFileId) await findOrCreateFile();
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+      method:'PATCH',
+      headers:{'Authorization':'Bearer ' + accessToken,'Content-Type':'application/json'},
+      body: json
+    });
+    setSyncStatus('ok','Saved ✓');
+  } catch(e) {
+    setSyncStatus('error','Save failed');
+  }
+}
+
+function scheduleSave() { if (saveTimer) clearTimeout(saveTimer); saveTimer = setTimeout(saveToDrive, 800); }
+function setSyncStatus(state, msg) {
+  document.getElementById('sync-dot').className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
+  document.getElementById('sync-label').textContent = msg;
+}
+
+// ── HELPERS ──
+function dateKey(d) { return d.toISOString().slice(0,10); }
+function getMonday(d) {
+  const dt=new Date(d), day=dt.getDay(), diff=day===0?-6:1-day;
+  dt.setDate(dt.getDate()+diff); dt.setHours(0,0,0,0); return dt;
+}
+function getDayRecord(kid,ds) { return appData[kid]?.[ds]||{}; }
+function starsForDay(kid,ds) { const r=getDayRecord(kid,ds); return CHORES.reduce((t,c,i)=>t+(r[i]?c.stars:0),0); }
+function starsForWeek(kid,wkStart) {
+  let t=0;
+  for(let i=0;i<7;i++){const d=new Date(wkStart);d.setDate(d.getDate()+i);t+=starsForDay(kid,dateKey(d));}
+  return t;
+}
+function earnedKr(stars) { return Math.floor(stars/15)*2; }
+function getAllWeekKeys(kid) {
+  const s=new Set();
+  Object.keys(appData[kid]||{}).forEach(dk=>s.add(dateKey(getMonday(new Date(dk)))));
+  return Array.from(s).sort().reverse();
+}
+function toggleChore(kid,ds,idx) {
+  if(!appData[kid])appData[kid]={};
+  if(!appData[kid][ds])appData[kid][ds]={};
+  appData[kid][ds][idx]=!appData[kid][ds][idx];
+  scheduleSave(); render();
+}
+function changeDate(d){currentDate.setDate(currentDate.getDate()+d);render();}
+function goToday(){currentDate=new Date();currentDate.setHours(0,0,0,0);render();}
+function switchKid(k){
+  currentKid=k;currentView='chores';
+  document.getElementById('earnings-view').style.display='none';
+  document.getElementById('chores-view').style.display='block';
+  document.getElementById('tab-dhiya').classList.toggle('active',k==='Dhiya');
+  document.getElementById('tab-iniya').classList.toggle('active',k==='Iniya');
+  document.getElementById('tab-earn').classList.remove('active');
+  render();
+}
+function showEarnings(){
+  currentView='earnings';
+  document.getElementById('chores-view').style.display='none';
+  document.getElementById('earnings-view').style.display='block';
+  document.getElementById('tab-dhiya').classList.remove('active');
+  document.getElementById('tab-iniya').classList.remove('active');
+  document.getElementById('tab-earn').classList.add('active');
+  renderEarnings();
+}
+function fmtDate(d){
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()]+', '+d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();
+}
+function fmtWeek(wk){
+  const d=new Date(wk),e=new Date(d),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  e.setDate(e.getDate()+6);
+  return d.getDate()+' '+m[d.getMonth()]+' – '+e.getDate()+' '+m[e.getMonth()];
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── RENDER ──
+function render(){
+  if(currentView==='earnings'){renderEarnings();return;}
+  const ds=dateKey(currentDate);
+  const rec=getDayRecord(currentKid,ds);
+  const wkStart=getMonday(currentDate);
+  const todayStars=starsForDay(currentKid,ds);
+  const weekStars=starsForWeek(currentKid,wkStart);
+  const today=new Date();today.setHours(0,0,0,0);
+  const isFuture=currentDate>today;
+  const isToday=dateKey(currentDate)===dateKey(today);
+
+  document.getElementById('date-main').textContent=isToday?'Today':fmtDate(currentDate);
+  document.getElementById('date-sub').textContent=isToday?fmtDate(currentDate):(isFuture?'Future — locked':'');
+  document.getElementById('stat-today').textContent=todayStars;
+  document.getElementById('stat-week').textContent=weekStars;
+
+  const inCurrent=weekStars%15;
+  const pct=Math.min(100,Math.round((inCurrent/15)*100));
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-count').textContent=inCurrent+' / 15';
+  document.getElementById('prog-reward').textContent=(15-inCurrent)+' more stars to earn 2 kr';
+
+  const cats=[...new Set(CHORES.map(c=>c.cat))];
+  let html='';
+  cats.forEach(cat=>{
+    html+=`<div class="cat-label">${cat}</div>`;
+    CHORES.forEach((chore,i)=>{
+      if(chore.cat!==cat)return;
+      const done=!!rec[i];
+      const dis=isFuture?'style="opacity:0.4;pointer-events:none;"':'';
+      html+=`<div class="chore-item ${done?'done':''}" onclick="toggleChore('${currentKid}','${ds}',${i})" ${dis}>
+        <div class="check"><svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="chore-text">${chore.name}</span>
+        <span class="star-chip">${chore.stars}⭐</span>
+      </div>`;
+    });
+  });
+  document.getElementById('chores-list').innerHTML=html;
+}
+
+function renderEarnings(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const thisWk=getMonday(today);
+  let heroHtml='';
+  ['Dhiya','Iniya'].forEach(kid=>{
+    const allWks=getAllWeekKeys(kid);
+    let confStars=0;
+    allWks.forEach(wk=>{if(new Date(wk)<thisWk)confStars+=starsForWeek(kid,new Date(wk));});
+    const kr=earnedKr(confStars);
+    const thisWkStars=starsForWeek(kid,thisWk);
+    heroHtml+=`<div class="earn-hero-card">
+      <div class="kid">${kid==='Dhiya'?'🌸':'🌺'} ${kid}</div>
+      <div class="amount ${kid.toLowerCase()}">${kr} kr</div>
+      <div class="earn-sub">confirmed earnings</div>
+      <div class="sep"></div>
+      <div class="wk-lbl">This week</div>
+      <div class="wk-prog">${thisWkStars} ⭐</div>
+    </div>`;
+  });
+  document.getElementById('earn-hero').innerHTML=heroHtml;
+
+  ['Dhiya','Iniya'].forEach(kid=>{
+    const allWks=getAllWeekKeys(kid);
+    let html='';
+    if(!allWks.length){html='<div class="empty-note">No data yet — start ticking chores!</div>';}
+    else allWks.forEach(wk=>{
+      const wkDate=new Date(wk);
+      const s=starsForWeek(kid,wkDate);
+      const e=earnedKr(s);
+      const isPast=wkDate<thisWk;
+      html+=`<div class="hist-row">
+        <span class="hr-week">${fmtWeek(wk)}</span>
+        <span class="hr-stars">${s}⭐</span>
+        ${isPast?`<span class="hr-earn">${e} kr</span>`:'<span class="hr-ongoing">in progress</span>'}
+      </div>`;
+    });
+    document.getElementById('hist-'+kid.toLowerCase()).innerHTML=html;
+  });
+}
+
+// ── BOOT ──
+if (CLIENT_ID) loadGIS();
+</script>
+</body>
+</html>

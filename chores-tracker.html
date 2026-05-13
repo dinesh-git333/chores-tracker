@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>⭐ Dhiya & Iniya — Chores</title>
+<style>
+:root {
+  --green:#1D9E75; --green-light:#E1F5EE; --green-mid:#5DCAA5;
+  --green-dark:#0F6E56; --green-pale:#9FE1CB;
+  --purple:#534AB7; --amber:#EF9F27; --amber-light:#FEF3DC;
+  --red:#E24B4A; --red-light:#FEECEC;
+  --bg:#FAF9F6; --card:#FFFFFF; --border:rgba(0,0,0,0.08);
+  --border-mid:rgba(0,0,0,0.13); --text:#1a1a18;
+  --text-2:#5a5a56; --text-3:#9a9a94;
+  --radius:14px; --radius-sm:9px;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --bg:#141412; --card:#1e1e1b; --border:rgba(255,255,255,0.08);
+    --border-mid:rgba(255,255,255,0.15); --text:#f0efe8;
+    --text-2:#a8a89e; --text-3:#686860;
+    --green-light:#0a2a1e; --amber-light:#2a1e06; --red-light:#2a0e0e;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);font-family:-apple-system,'Segoe UI',sans-serif;color:var(--text);min-height:100dvh;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100dvh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── PIN SCREEN ── */
+#pin-screen{align-items:center;justify-content:center;padding:2rem;text-align:center;background:var(--bg);}
+.pin-logo{font-size:56px;margin-bottom:1rem;}
+.pin-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+.pin-sub{font-size:14px;color:var(--text-2);margin-bottom:2.5rem;}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:2rem;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border-mid);background:transparent;transition:all 0.15s;}
+.pin-dot.filled{background:var(--green);border-color:var(--green);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px;}
+.pin-key{padding:18px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--card);font-size:22px;font-weight:600;cursor:pointer;transition:all 0.1s;user-select:none;color:var(--text);}
+.pin-key:active{transform:scale(0.93);background:var(--green-light);}
+.pin-key.del{font-size:18px;color:var(--text-2);}
+.pin-key.empty{border:none;background:transparent;pointer-events:none;}
+.pin-error{font-size:13px;color:var(--red);margin-top:1rem;height:18px;transition:opacity 0.2s;}
+
+/* ── AUTH / GOOGLE SCREEN ── */
+#auth-screen{align-items:center;justify-content:center;padding:2rem;text-align:center;background:var(--bg);}
+.auth-star{font-size:52px;margin-bottom:1rem;}
+.auth-title{font-size:20px;font-weight:700;margin-bottom:6px;}
+.auth-sub{font-size:13px;color:var(--text-2);margin-bottom:2rem;line-height:1.6;max-width:300px;}
+.google-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border-mid);border-radius:50px;padding:13px 24px;font-size:15px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.15s;margin-bottom:1rem;}
+.google-btn:hover{box-shadow:0 2px 14px rgba(0,0,0,0.1);}
+.google-icon{width:20px;height:20px;flex-shrink:0;}
+.auth-note{font-size:12px;color:var(--text-3);max-width:280px;line-height:1.7;}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-top:1.5rem;max-width:400px;width:100%;text-align:left;}
+.setup-box h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;}
+.setup-box ol{font-size:12px;color:var(--text-2);line-height:1.9;padding-left:1.1rem;}
+.setup-box a{color:var(--green);text-decoration:none;}
+.setup-box input{width:100%;margin-top:12px;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:13px;outline:none;}
+.setup-box input:focus{border-color:var(--green);}
+.save-btn{margin-top:10px;width:100%;padding:11px;background:var(--green);color:white;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* ── MAIN APP ── */
+#app-screen{background:var(--bg);}
+.top-bar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 18px 0;}
+.top-bar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.app-title{font-size:17px;font-weight:700;}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);padding:4px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green-mid);flex-shrink:0;}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.main-tabs{display:flex;gap:7px;padding-bottom:0;}
+.kid-tab{flex:1;padding:9px 0;border-radius:50px 50px 0 0;border:1px solid var(--border-mid);border-bottom:none;background:var(--card);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all 0.15s;text-align:center;}
+.kid-tab.active{background:var(--green);border-color:var(--green);color:white;}
+.earn-tab{padding:9px 13px;border-radius:50px 50px 0 0;border:1px solid var(--border-mid);border-bottom:none;background:var(--card);font-size:13px;color:var(--text-2);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.earn-tab.active{background:var(--amber);border-color:var(--amber);color:white;}
+.admin-tab{padding:9px 13px;border-radius:50px 50px 0 0;border:1px solid var(--border-mid);border-bottom:none;background:var(--card);font-size:13px;color:var(--text-2);cursor:pointer;transition:all 0.15s;}
+.admin-tab.active{background:var(--purple);border-color:var(--purple);color:white;}
+
+.content{padding:14px 18px;max-width:480px;margin:0 auto;width:100%;padding-bottom:40px;}
+
+/* DATE NAV */
+.date-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.nav-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-mid);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:20px;flex-shrink:0;}
+.nav-btn:active{background:var(--green-light);}
+.date-center{flex:1;text-align:center;}
+.date-main{font-size:15px;font-weight:600;}
+.date-sub{font-size:11px;color:var(--text-3);margin-top:1px;}
+.today-btn{font-size:11px;padding:4px 10px;background:var(--green-light);color:var(--green-dark);border:1px solid var(--green-pale);border-radius:20px;cursor:pointer;font-weight:500;white-space:nowrap;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;text-align:center;}
+.stat-card .s-lbl{font-size:11px;color:var(--text-3);margin-bottom:3px;}
+.stat-card .s-val{font-size:22px;font-weight:700;}
+.stat-card .s-sub{font-size:11px;color:var(--text-2);margin-top:2px;}
+
+/* PROGRESS */
+.prog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:14px;}
+.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.prog-title{font-size:12px;font-weight:500;color:var(--text-2);}
+.prog-count{font-size:12px;color:var(--text-3);}
+.prog-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--green));border-radius:4px;transition:width 0.4s ease;}
+.prog-reward{font-size:11px;color:var(--text-3);margin-top:5px;}
+
+/* CHORES */
+.cat-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin:14px 0 6px;}
+.chore-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 13px;margin-bottom:5px;cursor:pointer;transition:all 0.15s;user-select:none;}
+.chore-item:active{transform:scale(0.98);}
+.chore-item.done{background:var(--green-light);border-color:var(--green-pale);}
+.check{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid var(--border-mid);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.chore-item.done .check{background:var(--green);border-color:var(--green);}
+.chk-svg{display:none;}
+.chore-item.done .chk-svg{display:block;}
+.chore-text{flex:1;font-size:14px;color:var(--text);}
+.chore-item.done .chore-text{color:var(--green-dark);}
+.star-chip{font-size:11px;font-weight:600;padding:3px 8px;background:var(--bg);border:1px solid var(--border);border-radius:20px;color:var(--text-2);white-space:nowrap;}
+.chore-item.done .star-chip{background:var(--green-pale);border-color:transparent;color:var(--green-dark);}
+
+/* EARNINGS */
+.earn-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.earn-hero-card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);padding:15px;text-align:center;}
+.earn-hero-card .kid{font-size:12px;color:var(--text-3);margin-bottom:7px;}
+.earn-hero-card .amount{font-size:26px;font-weight:700;}
+.earn-hero-card .amount.dhiya{color:var(--green);}
+.earn-hero-card .amount.iniya{color:var(--purple);}
+.earn-hero-card .earn-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
+.earn-hero-card .sep{margin:9px 0;border-top:1px solid var(--border);}
+.earn-hero-card .wk-prog{font-size:13px;font-weight:600;}
+.earn-hero-card .wk-lbl{font-size:11px;color:var(--text-3);}
+.info-strip{background:var(--amber-light);border:1px solid rgba(239,159,39,0.2);border-radius:var(--radius-sm);padding:10px 13px;font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:14px;}
+.hist-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin:14px 0 7px;}
+.hist-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:5px;}
+.hist-row .hr-week{font-size:12px;color:var(--text-2);}
+.hist-row .hr-stars{font-size:12px;font-weight:600;}
+.hist-row .hr-earn{font-size:12px;font-weight:700;color:var(--green);}
+.hist-row .hr-ongoing{font-size:12px;color:var(--text-3);font-style:italic;}
+.empty-note{font-size:13px;color:var(--text-3);padding:8px 0;}
+
+/* ADMIN */
+.admin-section{margin-bottom:1.5rem;}
+.admin-section-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;}
+.add-chore-form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.form-row{margin-bottom:12px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px;display:block;}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:14px;outline:none;}
+.form-input:focus{border-color:var(--green);}
+select.form-input{cursor:pointer;}
+.stars-row{display:flex;gap:8px;}
+.star-opt{flex:1;padding:10px 0;border:1.5px solid var(--border-mid);border-radius:var(--radius-sm);text-align:center;font-size:13px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text-2);transition:all 0.12s;}
+.star-opt.selected{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.add-btn{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.add-btn:active{opacity:0.85;}
+.chore-manage-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:5px;}
+.chore-manage-item .cm-cat{font-size:10px;color:var(--text-3);background:var(--bg);padding:2px 7px;border-radius:10px;border:1px solid var(--border);white-space:nowrap;}
+.chore-manage-item .cm-name{flex:1;font-size:13px;color:var(--text);}
+.chore-manage-item .cm-stars{font-size:12px;color:var(--text-2);white-space:nowrap;}
+.del-btn{width:28px;height:28px;border-radius:50%;border:1px solid rgba(226,75,74,0.3);background:var(--red-light);color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.del-btn:active{opacity:0.7;}
+
+.signout-btn{display:block;margin:24px auto 0;padding:8px 20px;background:transparent;border:1px solid var(--border-mid);border-radius:20px;font-size:13px;color:var(--text-2);cursor:pointer;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#f0efe8;padding:10px 20px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- ══ PIN SCREEN ══ -->
+<div id="pin-screen" class="screen active">
+  <div class="pin-logo">⭐</div>
+  <div class="pin-title">Chores Tracker</div>
+  <div class="pin-sub">Dhiya & Iniya</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-grid">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+</div>
+
+<!-- ══ GOOGLE AUTH SCREEN ══ -->
+<div id="auth-screen" class="screen">
+  <div class="auth-star">☁️</div>
+  <div class="auth-title">Connect Google Drive</div>
+  <div class="auth-sub">Sign in once to sync chores data across all family devices.</div>
+  <button class="google-btn" onclick="handleSignIn()">
+    <svg class="google-icon" viewBox="0 0 24 24">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Sign in with Google
+  </button>
+  <p class="auth-note">Data is stored in a shared <strong>chores_data.json</strong> file in the owner's Google Drive.</p>
+  <div class="setup-box" id="setup-box" style="display:none;">
+    <h3>🔧 One-time setup needed</h3>
+    <ol>
+      <li>Go to <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a></li>
+      <li>Create a project → enable <strong>Google Drive API</strong></li>
+      <li>Go to <strong>Credentials → Create OAuth 2.0 Client ID → Web app</strong></li>
+      <li>Add your GitHub Pages URL to <em>Authorized JavaScript origins</em></li>
+      <li>Paste the Client ID below</li>
+    </ol>
+    <input type="text" id="client-id-input" placeholder="Paste OAuth Client ID here…" />
+    <button class="save-btn" onclick="saveClientId()">Save & Continue</button>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="app-screen" class="screen">
+  <div class="top-bar">
+    <div class="top-bar-row">
+      <div class="app-title">⭐ Stars Tracker</div>
+      <div class="sync-pill">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Synced</span>
+      </div>
+    </div>
+    <div class="main-tabs" id="main-tabs">
+      <button class="kid-tab active" id="tab-dhiya" onclick="switchKid('Dhiya')">🌸 Dhiya</button>
+      <button class="kid-tab" id="tab-iniya" onclick="switchKid('Iniya')">🌺 Iniya</button>
+      <button class="earn-tab" id="tab-earn" onclick="showEarnings()">💰</button>
+      <button class="admin-tab" id="tab-admin" onclick="showAdmin()" style="display:none;">⚙️</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- CHORES VIEW -->
+    <div id="chores-view">
+      <div class="date-nav">
+        <button class="nav-btn" onclick="changeDate(-1)">&#8249;</button>
+        <div class="date-center">
+          <div class="date-main" id="date-main"></div>
+          <div class="date-sub" id="date-sub"></div>
+        </div>
+        <button class="nav-btn" onclick="changeDate(1)">&#8250;</button>
+        <button class="today-btn" onclick="goToday()">Today</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="s-lbl">Today's stars</div><div class="s-val" id="stat-today">0</div><div class="s-sub">⭐ earned</div></div>
+        <div class="stat-card"><div class="s-lbl">This week</div><div class="s-val" id="stat-week">0</div><div class="s-sub">⭐ total</div></div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-hdr"><span class="prog-title">Progress to next 2 kr</span><span class="prog-count" id="prog-count">0 / 15</span></div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="prog-reward" id="prog-reward"></div>
+      </div>
+      <div id="chores-list"></div>
+    </div>
+
+    <!-- EARNINGS VIEW -->
+    <div id="earnings-view" style="display:none;">
+      <div class="earn-hero" id="earn-hero"></div>
+      <div class="info-strip">💡 Every 15 ⭐ = 2 kr. Earnings confirmed each Sunday. Current week stars are in progress.</div>
+      <div class="hist-title">🌸 Dhiya — Weekly History</div>
+      <div id="hist-dhiya"></div>
+      <div class="hist-title" style="margin-top:16px;">🌺 Iniya — Weekly History</div>
+      <div id="hist-iniya"></div>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-view" style="display:none;">
+
+      <div class="admin-section">
+        <div class="admin-section-title">Add New Chore</div>
+        <div class="add-chore-form">
+          <div class="form-row">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="new-cat">
+              <option value="Food Goals">Food Goals</option>
+              <option value="Time Management">Time Management</option>
+              <option value="Studying">Studying</option>
+              <option value="__new__">+ New category…</option>
+            </select>
+          </div>
+          <div class="form-row" id="new-cat-input-row" style="display:none;">
+            <label class="form-label">New Category Name</label>
+            <input type="text" class="form-input" id="new-cat-name" placeholder="e.g. Health & Fitness" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">Chore Name</label>
+            <input type="text" class="form-input" id="new-name" placeholder="e.g. Drink 2L water" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">Stars</label>
+            <div class="stars-row">
+              <div class="star-opt selected" onclick="selectStars(1)">1 ⭐</div>
+              <div class="star-opt" onclick="selectStars(2)">2 ⭐</div>
+              <div class="star-opt" onclick="selectStars(3)">3 ⭐</div>
+              <div class="star-opt" onclick="selectStars(4)">4 ⭐</div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="addChore()">+ Add Chore</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Manage Chores</div>
+        <div id="chore-manage-list"></div>
+      </div>
+
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const DRIVE_FILE_ID = '1AZpnxE38j8yv79XCADtGbqvRBIsSBPUA';
+const ADMIN_PIN     = '2525';
+const SCOPES        = 'https://www.googleapis.com/auth/drive.file';
+
+const DEFAULT_CHORES = [
+  {cat:'Food Goals',      name:'Vegetables',           stars:2},
+  {cat:'Food Goals',      name:'Fruits',               stars:2},
+  {cat:'Food Goals',      name:'Full Egg',             stars:1},
+  {cat:'Food Goals',      name:'Beetroot Juice',       stars:2},
+  {cat:'Time Management', name:'Leave by 7:45 AM',     stars:1},
+  {cat:'Time Management', name:'Shower under 20 min',  stars:1},
+  {cat:'Time Management', name:'Hair wash under 1 hr', stars:1},
+  {cat:'Time Management', name:'TV time — 45 min',     stars:1},
+  {cat:'Time Management', name:'Screen time — 1 hr',   stars:1},
+  {cat:'Time Management', name:'Bed by 9:30 PM',       stars:2},
+  {cat:'Studying',        name:'Writing 1 page',       stars:1},
+  {cat:'Studying',        name:'Tamil — Read / Write', stars:1},
+  {cat:'Studying',        name:'Math',                 stars:1},
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let CLIENT_ID   = localStorage.getItem('goog_client_id') || '';
+let tokenClient = null, accessToken = null;
+let isAdmin     = false;
+let currentKid  = 'Dhiya', currentView = 'chores';
+let currentDate = new Date(); currentDate.setHours(0,0,0,0);
+let saveTimer   = null;
+let selectedStars = 1;
+
+let appData = {
+  Dhiya: {},
+  Iniya: {},
+  chores: DEFAULT_CHORES
+};
+
+// ══════════════════════════════════════════
+// PIN LOGIC
+// ══════════════════════════════════════════
+let pinEntry = '';
+
+function pinKey(k) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += k;
+  updatePinDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+
+function pinDel() {
+  pinEntry = pinEntry.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots(state) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d' + i);
+    d.className = 'pin-dot' + (state === 'error' ? ' error' : pinEntry.length > i ? ' filled' : '');
+  }
+}
+
+function checkPin() {
+  if (pinEntry === ADMIN_PIN) {
+    isAdmin = true;
+    document.getElementById('tab-admin').style.display = '';
+    goToAuthOrApp();
+  } else if (pinEntry.length === 4) {
+    // Any 4-digit entry that isn't the admin PIN gets in as a regular user
+    // (kids/wife just tap any 4 digits — or we can make it open access)
+    // Let's treat non-admin pin as guest access (no admin tab)
+    isAdmin = false;
+    document.getElementById('tab-admin').style.display = 'none';
+    goToAuthOrApp();
+  } else {
+    updatePinDots('error');
+    document.getElementById('pin-error').textContent = 'Incorrect PIN';
+    setTimeout(() => {
+      pinEntry = '';
+      updatePinDots();
+      document.getElementById('pin-error').textContent = '';
+    }, 800);
+  }
+}
+
+function goToAuthOrApp() {
+  // If already have a token, skip auth screen
+  if (accessToken) {
+    showScreen('app-screen');
+    render();
+  } else {
+    showScreen('auth-screen');
+    if (CLIENT_ID) loadGIS();
+  }
+}
+
+// ══════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// GOOGLE AUTH
+// ══════════════════════════════════════════
+function saveClientId() {
+  const v = document.getElementById('client-id-input').value.trim();
+  if (!v) { showToast('Please paste your Client ID'); return; }
+  localStorage.setItem('goog_client_id', v);
+  CLIENT_ID = v;
+  document.getElementById('setup-box').style.display = 'none';
+  loadGIS();
+}
+
+function loadGIS() {
+  if (window._gisLoaded) { initTokenClient(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = () => { window._gisLoaded = true; initTokenClient(); };
+  document.head.appendChild(s);
+}
+
+function initTokenClient() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: onToken,
+  });
+}
+
+function handleSignIn() {
+  if (!CLIENT_ID) { document.getElementById('setup-box').style.display = 'block'; return; }
+  if (!tokenClient) { showToast('Loading… try again in a moment'); loadGIS(); return; }
+  tokenClient.requestAccessToken({prompt: ''});
+}
+
+function onToken(resp) {
+  if (resp.error) { showToast('Sign-in failed: ' + resp.error); return; }
+  accessToken = resp.access_token;
+  showScreen('app-screen');
+  loadFromDrive();
+}
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, ()=>{});
+  accessToken = null;
+  pinEntry = '';
+  updatePinDots();
+  showScreen('pin-screen');
+}
+
+// ══════════════════════════════════════════
+// GOOGLE DRIVE
+// ══════════════════════════════════════════
+async function loadFromDrive() {
+  setSyncStatus('syncing', 'Loading…');
+  try {
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`, {
+      headers: {'Authorization': 'Bearer ' + accessToken}
+    });
+    if (!r.ok) throw new Error('fetch failed');
+    const txt = await r.text();
+    const parsed = JSON.parse(txt);
+    if (parsed.Dhiya !== undefined) {
+      appData.Dhiya  = parsed.Dhiya  || {};
+      appData.Iniya  = parsed.Iniya  || {};
+      appData.chores = parsed.chores || DEFAULT_CHORES;
+    }
+    localStorage.setItem('chores_cache', JSON.stringify(appData));
+    setSyncStatus('ok', 'Synced');
+  } catch(e) {
+    const c = localStorage.getItem('chores_cache');
+    if (c) try { const p=JSON.parse(c); appData.Dhiya=p.Dhiya||{}; appData.Iniya=p.Iniya||{}; appData.chores=p.chores||DEFAULT_CHORES; } catch{}
+    setSyncStatus('error', 'Offline — cached');
+  }
+  render();
+}
+
+async function saveToDrive() {
+  if (!accessToken) return;
+  setSyncStatus('syncing', 'Saving…');
+  const json = JSON.stringify(appData, null, 2);
+  localStorage.setItem('chores_cache', json);
+  try {
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_FILE_ID}?uploadType=media`, {
+      method: 'PATCH',
+      headers: {'Authorization':'Bearer '+accessToken, 'Content-Type':'application/json'},
+      body: json
+    });
+    setSyncStatus('ok', 'Saved ✓');
+  } catch(e) {
+    setSyncStatus('error', 'Save failed');
+  }
+}
+
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToDrive, 800);
+}
+
+function setSyncStatus(state, msg) {
+  document.getElementById('sync-dot').className = 'sync-dot'+(state==='syncing'?' syncing':state==='error'?' error':'');
+  document.getElementById('sync-label').textContent = msg;
+}
+
+// ══════════════════════════════════════════
+// DATA HELPERS
+// ══════════════════════════════════════════
+function dateKey(d)    { return d.toISOString().slice(0,10); }
+function getMonday(d)  {
+  const dt=new Date(d),day=dt.getDay(),diff=day===0?-6:1-day;
+  dt.setDate(dt.getDate()+diff); dt.setHours(0,0,0,0); return dt;
+}
+function getDayRecord(kid,ds) { return appData[kid]?.[ds]||{}; }
+
+function starsForDay(kid,ds) {
+  const r=getDayRecord(kid,ds);
+  return appData.chores.reduce((t,c,i)=>t+(r[i]?c.stars:0),0);
+}
+function starsForWeek(kid,wkStart) {
+  let t=0;
+  for(let i=0;i<7;i++){const d=new Date(wkStart);d.setDate(d.getDate()+i);t+=starsForDay(kid,dateKey(d));}
+  return t;
+}
+function earnedKr(stars) { return Math.floor(stars/15)*2; }
+function getAllWeekKeys(kid) {
+  const s=new Set();
+  Object.keys(appData[kid]||{}).forEach(dk=>s.add(dateKey(getMonday(new Date(dk)))));
+  return Array.from(s).sort().reverse();
+}
+
+function toggleChore(kid,ds,idx) {
+  if(!appData[kid])appData[kid]={};
+  if(!appData[kid][ds])appData[kid][ds]={};
+  appData[kid][ds][idx]=!appData[kid][ds][idx];
+  scheduleSave(); render();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function changeDate(d) { currentDate.setDate(currentDate.getDate()+d); render(); }
+function goToday()     { currentDate=new Date(); currentDate.setHours(0,0,0,0); render(); }
+
+function setTab(active) {
+  document.getElementById('tab-dhiya').classList.toggle('active', active==='dhiya');
+  document.getElementById('tab-iniya').classList.toggle('active', active==='iniya');
+  document.getElementById('tab-earn').classList.toggle('active',  active==='earn');
+  document.getElementById('tab-admin').classList.toggle('active', active==='admin');
+}
+function switchKid(k) {
+  currentKid=k; currentView='chores';
+  document.getElementById('chores-view').style.display='';
+  document.getElementById('earnings-view').style.display='none';
+  document.getElementById('admin-view').style.display='none';
+  setTab(k.toLowerCase());
+  render();
+}
+function showEarnings() {
+  currentView='earnings';
+  document.getElementById('chores-view').style.display='none';
+  document.getElementById('earnings-view').style.display='';
+  document.getElementById('admin-view').style.display='none';
+  setTab('earn'); renderEarnings();
+}
+function showAdmin() {
+  if (!isAdmin) return;
+  currentView='admin';
+  document.getElementById('chores-view').style.display='none';
+  document.getElementById('earnings-view').style.display='none';
+  document.getElementById('admin-view').style.display='';
+  setTab('admin'); renderAdmin();
+}
+
+// ══════════════════════════════════════════
+// ADMIN — ADD / REMOVE CHORES
+// ══════════════════════════════════════════
+function selectStars(n) {
+  selectedStars = n;
+  document.querySelectorAll('.star-opt').forEach((el,i)=>el.classList.toggle('selected',i===n-1));
+}
+
+document.getElementById('new-cat').addEventListener('change', function() {
+  document.getElementById('new-cat-input-row').style.display = this.value==='__new__' ? '' : 'none';
+});
+
+function addChore() {
+  let cat = document.getElementById('new-cat').value;
+  if (cat === '__new__') {
+    cat = document.getElementById('new-cat-name').value.trim();
+    if (!cat) { showToast('Please enter a category name'); return; }
+  }
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { showToast('Please enter a chore name'); return; }
+  appData.chores.push({cat, name, stars: selectedStars});
+  document.getElementById('new-name').value = '';
+  scheduleSave();
+  renderAdmin();
+  showToast('Chore added ✓');
+}
+
+function deleteChore(idx) {
+  if (!confirm(`Delete "${appData.chores[idx].name}"?`)) return;
+  appData.chores.splice(idx,1);
+  // Clean up any references to this index in records — simplest: just leave orphaned data
+  scheduleSave();
+  renderAdmin();
+  showToast('Chore removed');
+}
+
+// ══════════════════════════════════════════
+// FORMAT HELPERS
+// ══════════════════════════════════════════
+function fmtDate(d) {
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+        m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()]+', '+d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();
+}
+function fmtWeek(wk) {
+  const d=new Date(wk),e=new Date(d),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  e.setDate(e.getDate()+6);
+  return d.getDate()+' '+m[d.getMonth()]+' – '+e.getDate()+' '+m[e.getMonth()];
+}
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function render() {
+  const ds=dateKey(currentDate);
+  const rec=getDayRecord(currentKid,ds);
+  const wkStart=getMonday(currentDate);
+  const todayStars=starsForDay(currentKid,ds);
+  const weekStars=starsForWeek(currentKid,wkStart);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const isFuture=currentDate>today;
+  const isToday=dateKey(currentDate)===dateKey(today);
+
+  document.getElementById('date-main').textContent=isToday?'Today':fmtDate(currentDate);
+  document.getElementById('date-sub').textContent=isToday?fmtDate(currentDate):(isFuture?'Future date — locked':'');
+  document.getElementById('stat-today').textContent=todayStars;
+  document.getElementById('stat-week').textContent=weekStars;
+
+  const inCurrent=weekStars%15;
+  const pct=Math.min(100,Math.round((inCurrent/15)*100));
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-count').textContent=inCurrent+' / 15';
+  document.getElementById('prog-reward').textContent=(15-inCurrent)+' more stars to earn 2 kr';
+
+  const cats=[...new Set(appData.chores.map(c=>c.cat))];
+  let html='';
+  cats.forEach(cat=>{
+    html+=`<div class="cat-label">${cat}</div>`;
+    appData.chores.forEach((chore,i)=>{
+      if(chore.cat!==cat)return;
+      const done=!!rec[i];
+      const dis=isFuture?'style="opacity:0.4;pointer-events:none;"':'';
+      html+=`<div class="chore-item ${done?'done':''}" onclick="toggleChore('${currentKid}','${ds}',${i})" ${dis}>
+        <div class="check"><svg class="chk-svg" width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="chore-text">${chore.name}</span>
+        <span class="star-chip">${chore.stars}⭐</span>
+      </div>`;
+    });
+  });
+  document.getElementById('chores-list').innerHTML=html;
+}
+
+function renderEarnings() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const thisWk=getMonday(today);
+  let heroHtml='';
+  ['Dhiya','Iniya'].forEach(kid=>{
+    const allWks=getAllWeekKeys(kid);
+    let confStars=0;
+    allWks.forEach(wk=>{if(new Date(wk)<thisWk)confStars+=starsForWeek(kid,new Date(wk));});
+    const kr=earnedKr(confStars);
+    const thisWkStars=starsForWeek(kid,thisWk);
+    heroHtml+=`<div class="earn-hero-card">
+      <div class="kid">${kid==='Dhiya'?'🌸':'🌺'} ${kid}</div>
+      <div class="amount ${kid.toLowerCase()}">${kr} kr</div>
+      <div class="earn-sub">confirmed earnings</div>
+      <div class="sep"></div>
+      <div class="wk-lbl">This week</div>
+      <div class="wk-prog">${thisWkStars} ⭐</div>
+    </div>`;
+  });
+  document.getElementById('earn-hero').innerHTML=heroHtml;
+
+  ['Dhiya','Iniya'].forEach(kid=>{
+    const allWks=getAllWeekKeys(kid);
+    let html='';
+    if(!allWks.length){html='<div class="empty-note">No data yet — start ticking chores!</div>';}
+    else allWks.forEach(wk=>{
+      const wkDate=new Date(wk);
+      const s=starsForWeek(kid,wkDate);
+      const e=earnedKr(s);
+      const isPast=wkDate<thisWk;
+      html+=`<div class="hist-row">
+        <span class="hr-week">${fmtWeek(wk)}</span>
+        <span class="hr-stars">${s}⭐</span>
+        ${isPast?`<span class="hr-earn">${e} kr</span>`:'<span class="hr-ongoing">in progress</span>'}
+      </div>`;
+    });
+    document.getElementById('hist-'+kid.toLowerCase()).innerHTML=html;
+  });
+}
+
+function renderAdmin() {
+  let html='';
+  const cats=[...new Set(appData.chores.map(c=>c.cat))];
+  cats.forEach(cat=>{
+    html+=`<div class="cat-label">${cat}</div>`;
+    appData.chores.forEach((c,i)=>{
+      if(c.cat!==cat)return;
+      html+=`<div class="chore-manage-item">
+        <span class="cm-name">${c.name}</span>
+        <span class="cm-stars">${c.stars}⭐</span>
+        <button class="del-btn" onclick="deleteChore(${i})">×</button>
+      </div>`;
+    });
+  });
+  document.getElementById('chore-manage-list').innerHTML=html;
+}
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+if (CLIENT_ID) loadGIS();
+</script>
+</body>
+</html>
